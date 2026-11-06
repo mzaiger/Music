@@ -34,10 +34,8 @@
   .tabs.sources .tab-btn { font-size:14px; padding:8px 18px; }
   .timeframes .tabs { display:grid; grid-template-columns:repeat(6,auto); }
   .timeframes .tab-btn { text-align:center; }
-  .sortbox { display:flex; flex-direction:column; align-items:flex-start; gap:6px; max-width:100%; }
-  .sort { display:flex; flex-wrap:wrap; max-width:100%; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text-dim); }
-  .sort span { min-width:48px; }
-  .sort span.gap { min-width:0; margin-left:8px; }
+  .sort, .layout { display:flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text-dim); }
+  .sort span, .layout span { min-width:48px; }
   .count { font-family:'IBM Plex Mono',monospace; color:var(--text-dim); font-size:12px; margin:0 0 12px; }
 
 
@@ -126,8 +124,8 @@
     .timeframes .tabs { grid-template-columns:repeat(6,minmax(0,1fr)); }
     .timeframes .tab-btn { padding:7px 2px; font-size:11px; white-space:normal; line-height:1.15; }
     .tabs.sources .tab-btn { padding:8px 12px; }
-    .sort span { min-width:0; }
-    .sort { gap:5px; }
+    .sort span, .layout span { min-width:0; }
+    .sort, .layout { gap:5px; }
     .sort span.gap { margin-left:4px; }
     .sort-btn { padding:6px 8px; }
   }
@@ -147,14 +145,15 @@
   <div class="controls">
     <div class="tabs sources" id="sources"></div>
     <div class="timeframes"><div class="tabs" id="tabs"></div></div>
-        <div class="sortbox">
-      <div class="sort"><span>Layout</span>
-        <button class="sort-btn" data-layout="tile">Tiles</button>
-        <button class="sort-btn" data-layout="rows">Rows</button>
-        <span class="gap">Sort</span>
-        <button class="sort-btn" data-sort="rank">Ranking</button>
-        <button class="sort-btn" data-sort="date">Newest</button>
-      </div>
+    <div class="layout">
+      <span>Layout</span>
+      <button class="sort-btn" data-layout="tile">Tiles</button>
+      <button class="sort-btn" data-layout="rows">Rows</button>
+    </div>
+    <div class="sort">
+      <span>Sort</span>
+      <button class="sort-btn" data-sort="rank">Ranking</button>
+      <button class="sort-btn" data-sort="date">Newest</button>
     </div>
   </div>
   <p class="count" id="count"></p>
