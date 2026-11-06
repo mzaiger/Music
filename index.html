@@ -41,6 +41,8 @@
   .count { font-family:'IBM Plex Mono',monospace; color:var(--text-dim); font-size:12px; margin:0 0 12px; }
 
 
+  .tr { font-size:11px; font-weight:600; margin-left:5px; }
+  .tr.up { color:#1f9d55; } .tr.down { color:#d64545; } .tr.new { color:var(--blue); } .tr.same { color:var(--text-dim); }
   .thumb-wrap.youtube { aspect-ratio:16/9; }
   .artist { font-size:12.5px; color:var(--text-dim); margin:-2px 0 6px; overflow-wrap:anywhere; }
   .links { display:flex; flex-wrap:wrap; gap:5px; margin-top:auto; }
@@ -157,7 +159,7 @@
   </div>
   <p class="count" id="count"></p>
   <div id="out"></div>
-  <p class="foot">Data: Spotify daily chart via <a href="https://kworb.net/spotify/">kworb.net</a>, Billboard Hot 100 via a community JSON on raw.githubusercontent.com, Apple&rsquo;s iTunes RSS and search API, and the YouTube Data API (US music category). <b>All</b> gives each chart equal weight: a song earns 101 minus its rank on each chart (0 if absent), averaged over the charts. Songs are matched across charts by title and artist, so an odd spelling can split one song into two rows. Dates are Apple release dates (YouTube upload date if Apple has none). Greyed link buttons are searches because no direct link was found. Spotify, Billboard, Apple and YouTube are not affiliated with this site.</p>
+  <p class="foot">Data: Spotify daily chart via <a href="https://kworb.net/spotify/">kworb.net</a>, Billboard Hot 100 via a community JSON on raw.githubusercontent.com, Apple&rsquo;s iTunes RSS and search API, and the YouTube Data API (US music category). <b>All</b> gives each chart equal weight: a song earns 101 minus its rank on each chart (0 if absent), averaged over the charts. Songs are matched across charts by title and artist, so an odd spelling can split one song into two rows. Dates are Apple release dates (YouTube upload date if Apple has none). Arrows compare each song&rsquo;s rank with the same chart a week ago (NEW = not on it then); they appear once a week of history exists, except Billboard, which supplies last week&rsquo;s rank. Greyed link buttons are searches because no direct link was found. Spotify, Billboard, Apple and YouTube are not affiliated with this site.</p>
 </main>
 <script>
 const fmt = n => Number(n).toLocaleString('en-US');
@@ -192,6 +194,13 @@ let layout = pref('music_layout', 'tile') === 'rows' ? 'rows' : 'tile';
 let sort = pref('music_sort', 'rank') === 'date' ? 'date' : 'rank';
 const favs = new Map((() => { try { return Object.entries(JSON.parse(pref('music_favs', '{}'))); } catch { return []; } })());
 const saveFavs = () => setPref('music_favs', JSON.stringify(Object.fromEntries(favs)));
+let curBase = null;
+function trend(it) {                                       // movement vs the chart a week ago
+  if (!curBase || !it.rank) return '';
+  if (it.prev == null) return '<span class="tr new">NEW</span>';
+  const d = it.prev - it.rank;
+  return d > 0 ? `<span class="tr up">▲${d}</span>` : d < 0 ? `<span class="tr down">▼${-d}</span>` : '<span class="tr same">–</span>';
+}
 let lookup = new Map(); const store = {}; const expanded = new Set();
 const favKey = it => `${source}:${it.id}`;
 
@@ -221,7 +230,7 @@ function tileHtml(it, S) {
   return `<article class="card">
     <div class="thumb-wrap ${S.cls}">${u ? `<a class="thumb-link" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${thumb(it)}</a>` : thumb(it)}
       <label class="fav-toggle" title="Favorite"><input type="checkbox" class="fav-input" data-key="${esc(key)}" ${favs.has(key) ? 'checked' : ''}><span class="fav-star">★</span></label>
-      ${it.rank ? `<div class="rank-pill">#${it.rank}</div>` : ''}
+      ${it.rank ? `<div class="rank-pill">#${it.rank}${trend(it)}</div>` : ''}
     </div>
     <div class="body">
       <p class="title">${esc(it.title)}</p><p class="artist">${esc(it.artist)}</p>
@@ -238,7 +247,7 @@ function rowHtml(it, S) {
   return `<div class="row-item">
     <label class="row-fav" title="Favorite"><input type="checkbox" class="fav-input" data-key="${esc(key)}" ${favs.has(key) ? 'checked' : ''}><span class="fav-star">★</span></label>
     <div class="row-thumb">${thumb(it)}</div>
-    <span class="row-rank">${it.rank ? '#' + it.rank : '—'}</span>
+    <span class="row-rank">${it.rank ? '#' + it.rank : '—'}${trend(it)}</span>
     <span class="row-title">${esc(it.title)}<br><span class="row-date">${esc(it.artist)}</span></span>
     <span class="row-desc">${esc(it.desc || '—')}</span>
     <span class="row-date">${esc(fmtDate(it.date))}</span>
@@ -257,6 +266,7 @@ async function render() {
   const S = SOURCES.find(s => s.k === source), out = $('out'), d = await load(source);
   if (S.k !== source) return;
   $('lastUpdated').textContent = d ? `Last updated: ${ago(d.updated)}` : 'Last updated: not yet';
+  curBase = d ? d.trend_base : null;
   const items = d ? d.items : [];
   let list = items.filter(it => !months || (it.date && it.date >= cutoff(months))).sort((a, b) => a.rank - b.rank);
   if (sort === 'date') list.sort((a, b) => (b.date || '').localeCompare(a.date || '') || a.rank - b.rank);

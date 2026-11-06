@@ -23,6 +23,9 @@ Same design as the Software Board. GitHub Actions fetch the charts daily and com
 
 Local: `pip install -r requirements.txt`, `YOUTUBE_API_KEY=... python music.py`, `python -m http.server`.
 
+## Trend arrows
+Each run saves a snapshot of every chart's ranks in `state/history.json` (three weeks kept). Songs show ▲/▼ with the places moved against the snapshot nearest seven days old, `–` for no change and NEW if not on the chart then. Billboard uses its own last-week rank, so it works from day one; the other tabs start showing arrows once a week of history exists.
+
 ## Notes
 * A source that fails keeps its previous JSON, and `all` is rebuilt from whatever is available.
 * kworb is HTML, not an API, so the parser could break if its table layout changes. The Billboard JSON comes from a community repo; check that it is still updating.

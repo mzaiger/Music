@@ -92,7 +92,7 @@ def fetch_spotify():
 def fetch_billboard():
     d = get("https://raw.githubusercontent.com/mhollingshead/billboard-hot-100/main/recent.json")
     url = f"https://www.billboard.com/charts/hot-100/{d['date']}/"
-    return [{"rank": r["this_week"], "title": r["song"], "artist": r["artist"], "id": f"{r['this_week']}", "url": url,
+    return [{"rank": r["this_week"], "title": r["song"], "artist": r["artist"], "id": re.sub(r"[^a-z0-9]+", "-", f"{r['song']} {r['artist']}".lower()).strip("-"), "url": url, "prev": r.get("last_week"),
              "metric": r.get("weeks_on_chart") or 0, "peak": r.get("peak_position") or r["this_week"], "chart_date": d["date"]}
             for r in d["data"][:TOP_N]]
 
@@ -152,7 +152,7 @@ def build():
             if old:
                 raw[s] = [{**o, "rank": o["rank"], "url": o["links"].get({"spotify": "spotify", "billboard": "billboard", "itunes": "itunes", "youtube": "video"}[s], ""),
                            "image": o.get("art", ""), "thumb": o.get("thumb", ""), "metric": o["metric"], "id": o["id"].split(":", 1)[-1],
-                           "peak": o.get("peak", o["rank"]), "total": o.get("total", 0), "date": o.get("date", "")} for o in old]
+                           "peak": o.get("peak", o["rank"]), "prev": o.get("prev"), "total": o.get("total", 0), "date": o.get("date", "")} for o in old]
     if not raw:
         raise SystemExit("every source failed")
     if len(failed) == len(SRC):
@@ -236,22 +236,43 @@ def build():
         return it
 
     updated = NOW.strftime("%Y-%m-%dT%H:%M:%SZ")
+    hp = "state/history.json"; hist = load(hp, {}); today = NOW.strftime("%Y-%m-%d")
+
+    def baseline(s):                                                # snapshot closest to 7 days ago (at least 6 days old)
+        best = None
+        for d, snap in hist.items():
+            age = (NOW.date() - datetime.strptime(d, "%Y-%m-%d").date()).days
+            if age >= 6 and s in snap and (best is None or abs(age - 7) < abs(best[0] - 7)):
+                best = (age, d)
+        return (best[1], hist[best[1]][s]) if best else (None, {})
+    snap = {}
     for s in raw:
         rows = sorted((g for g in groups if s in g["m"]), key=lambda g: g["m"][s]["rank"])
-        items = []
+        bd, bm = baseline(s); items = []
         for g in rows:
             own = g["m"][s]; it = item(g, own)
             it.update({"id": f"{s}:{own['id']}", "rank": own["rank"], "metric": own["metric"]})
             if s == "youtube": it["image"] = own.get("thumb") or it["image"]
             if s == "billboard": it["peak"] = own["peak"]
             if s == "spotify": it["total"] = own.get("total", 0)
+            prev = own.get("prev") if s == "billboard" else bm.get(it["id"])    # Billboard supplies its own last-week rank
+            if prev: it["prev"] = prev
             items.append(it)
-        dump(f"data/{s}.json", {"source": s, "metric": LABEL[s], "updated": updated, "items": items[:TOP_N]})
+        items = items[:TOP_N]
+        if s not in failed: snap[s] = {i["id"]: i["rank"] for i in items}
+        dump(f"data/{s}.json", {"source": s, "metric": LABEL[s], "updated": updated, "trend_base": "last week" if s == "billboard" else bd, "items": items})
         print(f"  wrote data/{s}.json: {len(items)} items")
     allr = []
     for i, g in enumerate(groups[:TOP_N], 1):
         it = item(g, None); it.update({"rank": i, "metric": g["score"], "n": len(g["m"]), "of": n}); allr.append(it)
-    dump("data/all.json", {"source": "all", "metric": "score", "updated": updated, "sources": list(raw), "items": allr})
+    bd, bm = baseline("all")
+    for it in allr:
+        if bm.get(it["id"]): it["prev"] = bm[it["id"]]
+    snap["all"] = {i["id"]: i["rank"] for i in allr}
+    dump("data/all.json", {"source": "all", "metric": "score", "updated": updated, "sources": list(raw), "trend_base": bd, "items": allr})
+    hist.setdefault(today, {}).update(snap)                         # keep three weeks of daily snapshots
+    hist = {d: v for d, v in hist.items() if (NOW.date() - datetime.strptime(d, "%Y-%m-%d").date()).days <= 21}
+    dump(hp, hist)
     print(f"  wrote data/all.json: {len(allr)} items (equal weight across {list(raw)})")
 
 
