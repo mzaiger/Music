@@ -23,6 +23,7 @@
   .refresh-btn:hover { border-color:var(--blue); }
   .refresh-btn:disabled { opacity:.5; cursor:default; }
   .sort-btn.active { border-color:var(--blue); color:var(--blue); }
+  .foot-ico { width:14px; height:14px; border-radius:3px; vertical-align:-2px; margin-right:4px; }
   h1 { font-family:'Oswald',sans-serif; font-weight:700; text-transform:uppercase; letter-spacing:.02em; font-size:clamp(26px,4vw,38px); line-height:1; margin:0 0 6px; }
   .sub { color:var(--text-dim); font-size:13px; margin:0; max-width:900px; line-height:1.5; }
   main { max-width:1700px; margin:0 auto; padding:0 24px 60px; }
@@ -44,15 +45,18 @@
   .thumb-wrap.youtube { aspect-ratio:16/9; }
   .artist { font-size:12.5px; color:var(--text-dim); margin:-2px 0 6px; overflow-wrap:anywhere; }
   .links { display:flex; flex-wrap:wrap; gap:5px; margin-top:auto; }
-  .lk { flex:1 1 auto; text-align:center; padding:7px 8px; background:var(--panel); border:1px solid var(--line); border-radius:8px; color:var(--blue); text-decoration:none; font-family:'IBM Plex Mono',monospace; font-size:11.5px; font-weight:600; white-space:nowrap; }
+  .lk { flex:1 1 auto; display:inline-flex; align-items:center; justify-content:center; gap:6px; text-align:center; padding:7px 8px; background:var(--panel); border:1px solid var(--line); border-radius:8px; color:var(--blue); text-decoration:none; font-family:'IBM Plex Mono',monospace; font-size:11.5px; font-weight:600; white-space:nowrap; }
   .lk:hover { border-color:var(--blue); background:#fff; }
   .lk.s { color:var(--text-dim); font-weight:500; }
+  .lk-ico { width:16px; height:16px; border-radius:3px; flex:none; display:block; }
+  .lk.s .lk-ico { opacity:.7; }
   .chips { display:flex; flex-wrap:wrap; gap:4px; margin-top:8px; }
   .chip { font-family:'IBM Plex Mono',monospace; font-size:10.5px; padding:2px 7px; border:1px solid var(--line); border-radius:999px; color:var(--text-dim); background:var(--panel); }
   .rows-table { min-width:1180px; }
-  .rows-header-row, .row-item { grid-template-columns:34px 84px 52px minmax(150px,1.2fr) minmax(220px,2fr) 108px 190px 230px !important; }
+  .rows-header-row, .row-item { grid-template-columns:34px 84px 52px minmax(150px,1.2fr) minmax(220px,2fr) 108px 190px 300px !important; }
   .row-item .links { margin:0; flex-wrap:nowrap; }
-  .row-item .lk { padding:6px 4px; font-size:11px; }
+  .row-item .lk { padding:6px 4px; gap:4px; font-size:11px; }
+  .row-item .lk-ico { width:14px; height:14px; }
   /* tiles */
   .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:14px; }
   .card { position:relative; display:flex; flex-direction:column; background:#fff; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; box-shadow:0 1px 2px rgba(16,35,63,.04); }
@@ -158,7 +162,7 @@
   </div>
   <p class="count" id="count"></p>
   <div id="out"></div>
-  <p class="foot">Data: Spotify daily chart via <a href="https://kworb.net/spotify/">kworb.net</a>, Billboard Hot 100 via a community JSON on raw.githubusercontent.com, Apple&rsquo;s iTunes RSS and search API, and the YouTube Data API (US music category). <b>All</b> gives each chart equal weight: a song earns 101 minus its rank on each chart (0 if absent), averaged over the charts. Songs are matched across charts by title and artist, so an odd spelling can split one song into two rows. Dates are Apple release dates (YouTube upload date if Apple has none). Arrows compare each song&rsquo;s rank with the same chart a week ago (NEW = not on it then); they appear once a week of history exists, except Billboard, which supplies last week&rsquo;s rank. Greyed link buttons are searches because no direct link was found. Spotify, Billboard, Apple and YouTube are not affiliated with this site.</p>
+  <p class="foot">Data: Spotify daily chart via <a href="https://kworb.net/spotify/"><img class="foot-ico" src="https://www.google.com/s2/favicons?domain=kworb.net&sz=64" alt="" width="14" height="14" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">kworb.net</a>, Billboard Hot 100 via a community JSON on raw.githubusercontent.com, Apple&rsquo;s iTunes RSS and search API, and the YouTube Data API (US music category). <b>All</b> gives each chart equal weight: a song earns 101 minus its rank on each chart (0 if absent), averaged over the charts. Songs are matched across charts by title and artist, so an odd spelling can split one song into two rows. Dates are Apple release dates (YouTube upload date if Apple has none). Arrows compare each song&rsquo;s rank with the same chart a week ago (NEW = not on it then); they appear once a week of history exists, except Billboard, which supplies last week&rsquo;s rank. Greyed link buttons are searches because no direct link was found. Spotify, Billboard, Apple and YouTube are not affiliated with this site.</p>
 </main>
 <script>
 const fmt = n => Number(n).toLocaleString('en-US');
@@ -212,9 +216,10 @@ function thumb(it) { const u = safeUrl(it.image); return u ? `<img src="${esc(u)
 
 function linksHtml(it) {                                   // direct links, else a greyed search link
   const q = encodeURIComponent(`${it.title} ${it.artist}`), L = it.links || {};
-  const defs = [['spotify', 'Spotify', `https://open.spotify.com/search/${q}`], ['itunes', 'Apple', `https://music.apple.com/us/search?term=${q}`],
-                ['video', 'Video', `https://www.youtube.com/results?search_query=${q}`], ['billboard', 'Billboard', '']];
-  return `<div class="links">${defs.map(([k, n, s]) => { const u = safeUrl(L[k]); return u ? `<a class="lk" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${n} ↗</a>` : s ? `<a class="lk s" title="Search (no direct link found)" href="${esc(s)}" target="_blank" rel="noopener noreferrer">${n} 🔍</a>` : ''; }).join('')}</div>`;
+  const fav = d => `<img class="lk-ico" src="https://www.google.com/s2/favicons?domain=${d}&sz=64" alt="" width="16" height="16" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">`;
+  const defs = [['spotify', 'Spotify', `https://open.spotify.com/search/${q}`, 'open.spotify.com'], ['itunes', 'Apple', `https://music.apple.com/us/search?term=${q}`, 'music.apple.com'],
+                ['video', 'Video', `https://www.youtube.com/results?search_query=${q}`, 'youtube.com'], ['billboard', 'Billboard', '', 'billboard.com']];
+  return `<div class="links">${defs.map(([k, n, s, dom]) => { const u = safeUrl(L[k]); return u ? `<a class="lk" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${fav(dom)}${n} ↗</a>` : s ? `<a class="lk s" title="Search (no direct link found)" href="${esc(s)}" target="_blank" rel="noopener noreferrer">${fav(dom)}${n} 🔍</a>` : ''; }).join('')}</div>`;
 }
 function chipsHtml(it) {
   const r = it.ranks || {}, m = it.metrics || {}, c = [];
