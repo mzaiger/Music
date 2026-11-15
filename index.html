@@ -139,11 +139,11 @@
 <body>
 <header>
   <div class="eyebrow-row">
-    <p class="eyebrow">Music Board · Spotify · Billboard · iTunes · YouTube</p>
+    <p class="eyebrow">Music Board · Spotify · Billboard · Apple Music · YouTube</p>
     <div class="updated-row"><span id="lastUpdated">Last updated: —</span><button class="refresh-btn" id="refreshBtn" type="button">Refresh</button></div>
   </div>
   <h1>Music Board</h1>
-  <p class="sub">The top 100 songs right now on <b>Spotify</b> (global daily streams), <b>Billboard</b> Hot 100, <b>Apple iTunes</b> and <b>YouTube</b> music videos, plus an <b>All</b> ranking that combines the four with equal weight. Pick <b>Current</b> for the top 100 right now, or 1, 2, 3, 6 or 12 months to see only the songs from it released in that period (each keeps its top 100 rank). Every song links to Spotify, Apple Music, its music video and Billboard where it charts.</p>
+  <p class="sub">The top 100 songs right now on <b>Spotify</b> (global daily streams), <b>Billboard</b> Hot 100, <b>Apple Music</b> and <b>YouTube</b> music videos, plus an <b>All</b> ranking that combines the four with equal weight. Pick <b>Current</b> for the top 100 right now, or 1, 2, 3, 6 or 12 months to see only the songs from it released in that period (each keeps its top 100 rank). Every song links to Spotify, Apple Music, its music video and Billboard where it charts.</p>
 </header>
 <main>
   <div class="controls">
@@ -162,7 +162,7 @@
   </div>
   <p class="count" id="count"></p>
   <div id="out"></div>
-  <p class="foot">Data: Spotify daily chart via <a href="https://kworb.net/spotify/"><img class="foot-ico" src="https://www.google.com/s2/favicons?domain=kworb.net&sz=64" alt="" width="14" height="14" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">kworb.net</a>, Billboard Hot 100 via a community JSON on raw.githubusercontent.com, Apple&rsquo;s iTunes RSS and search API, and the YouTube Data API (US music category). <b>All</b> gives each chart equal weight: a song earns 101 minus its rank on each chart (0 if absent), averaged over the charts. Songs are matched across charts by title and artist, so an odd spelling can split one song into two rows. Dates are Apple release dates (YouTube upload date if Apple has none). Arrows compare each song&rsquo;s rank with the same chart a week ago (NEW = not on it then); they appear once a week of history exists, except Billboard, which supplies last week&rsquo;s rank. Greyed link buttons are searches because no direct link was found. Spotify, Billboard, Apple and YouTube are not affiliated with this site.</p>
+  <p class="foot">Data: Spotify daily chart via <a href="https://kworb.net/spotify/"><img class="foot-ico" src="https://www.google.com/s2/favicons?domain=kworb.net&sz=64" alt="" width="14" height="14" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">kworb.net</a>, Billboard Hot 100 via a community JSON on raw.githubusercontent.com, Apple&rsquo;s Apple Music most-played RSS feed (the iTunes Store top songs feed if that is unavailable) and iTunes search API, and the YouTube Data API (US music category). <b>All</b> gives each chart equal weight: a song earns 101 minus its rank on each chart (0 if absent), averaged over the charts. Songs are matched across charts by title and artist, so an odd spelling can split one song into two rows. Dates are Apple release dates (YouTube upload date if Apple has none). Arrows compare each song&rsquo;s rank with the same chart a week ago (NEW = not on it then); they appear once a week of history exists, except Billboard, which supplies last week&rsquo;s rank. Greyed link buttons are searches because no direct link was found. Spotify, Billboard, Apple and YouTube are not affiliated with this site.</p>
 </main>
 <script>
 const fmt = n => Number(n).toLocaleString('en-US');
@@ -174,7 +174,7 @@ const SOURCES = [
     metric: it => `<b>🎧 ${fmt(it.metric)}</b> streams`, row: it => `🎧 ${fmt(it.metric)} streams`, col:'Streams', empty:'songs' },
   { k:'billboard', l:'Billboard', hint:'Billboard Hot 100', cls:'billboard',
     metric: it => `<b>${it.metric}</b> wk${it.metric === 1 ? '' : 's'} · peak #${it.peak}`, row: it => `${it.metric} wks · peak #${it.peak}`, col:'Weeks on chart', empty:'songs' },
-  { k:'itunes', l:'iTunes', hint:'Apple Music top songs (US)', cls:'itunes',
+  { k:'itunes', l:'Apple Music', hint:'Apple Music top songs (US)', cls:'itunes',
     metric: it => `<b>Apple #${it.metric}</b> chart`, row: it => `Apple #${it.metric}`, col:'Apple Ranking', empty:'songs' },
   { k:'youtube', l:'YouTube', hint:'YouTube most popular music videos (US)', cls:'youtube',
     metric: it => `<b>▶ ${fmt(it.metric)}</b> views`, row: it => `▶ ${fmt(it.metric)} views`, col:'Views', empty:'videos' },
