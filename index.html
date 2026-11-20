@@ -164,6 +164,7 @@
   <div id="out"></div>
   <p class="foot">Data: Spotify daily chart via <a href="https://kworb.net/spotify/"><img class="foot-ico" src="https://www.google.com/s2/favicons?domain=kworb.net&sz=64" alt="" width="14" height="14" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">kworb.net</a>, Billboard Hot 100 via a community JSON on raw.githubusercontent.com, Apple&rsquo;s Apple Music most-played RSS feed (the iTunes Store top songs feed if that is unavailable) and iTunes search API, and the YouTube Data API (US music category). <b>All</b> gives each chart equal weight: a song earns 101 minus its rank on each chart (0 if absent), averaged over the charts. Songs are matched across charts by title and artist, so an odd spelling can split one song into two rows. Dates are Apple release dates (YouTube upload date if Apple has none). Arrows compare each song&rsquo;s rank with the same chart a week ago (NEW = not on it then); they appear once a week of history exists, except Billboard, which supplies last week&rsquo;s rank. Greyed link buttons are searches because no direct link was found. Spotify, Billboard, Apple and YouTube are not affiliated with this site.</p>
 </main>
+<script src="/ts-embed.js"></script>
 <script>
 const fmt = n => Number(n).toLocaleString('en-US');
 const cmp = n => Intl.NumberFormat('en-US', { notation:'compact', maximumFractionDigits:1 }).format(n);
